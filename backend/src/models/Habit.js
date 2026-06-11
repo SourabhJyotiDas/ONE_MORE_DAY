@@ -6,6 +6,7 @@ const HabitSchema = new mongoose.Schema({
   completedDates: { type: [String], default: [] },
   color: { type: String, default: '#3b82f6' },
   userId: { type: String, required: true },
+  order: { type: Number, default: 0 },
 }, { timestamps: true });
 
 module.exports = mongoose.model('Habit', HabitSchema);

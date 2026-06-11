@@ -5,7 +5,7 @@ exports.getHabits = async (req, res) => {
     const { userId } = req.query;
     if (!userId) return res.status(400).json({ message: 'userId is required' });
     
-    const habits = await Habit.find({ userId });
+    const habits = await Habit.find({ userId }).sort({ order: 1, createdAt: 1 });
     res.json(habits);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching habits', error });
@@ -15,7 +15,8 @@ exports.getHabits = async (req, res) => {
 exports.createHabit = async (req, res) => {
   try {
     const { name, type, color, userId } = req.body;
-    const newHabit = new Habit({ name, type, color, userId });
+    const count = await Habit.countDocuments({ userId });
+    const newHabit = new Habit({ name, type, color, userId, order: count });
     await newHabit.save();
     res.status(201).json(newHabit);
   } catch (error) {
@@ -52,5 +53,20 @@ exports.deleteHabit = async (req, res) => {
     res.json({ message: 'Habit deleted' });
   } catch (error) {
     res.status(500).json({ message: 'Error deleting habit', error });
+  }
+};
+
+exports.reorderHabits = async (req, res) => {
+  try {
+    const { habits } = req.body; // Array of { id, order }
+    
+    const updatePromises = habits.map(h => 
+      Habit.findByIdAndUpdate(h.id, { order: h.order })
+    );
+    
+    await Promise.all(updatePromises);
+    res.json({ message: 'Habits reordered' });
+  } catch (error) {
+    res.status(500).json({ message: 'Error reordering habits', error });
   }
 };

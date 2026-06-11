@@ -7,6 +7,7 @@ interface HabitContextType {
   habits: Habit[];
   addHabit: (name: string, type: 'good' | 'bad', color: string) => Promise<void>;
   removeHabit: (id: string) => Promise<void>;
+  reorderHabits: (newHabits: Habit[]) => void;
   toggleHabitComplete: (id: string, date: Date) => Promise<void>;
   user: User | null;
   login: (user: User) => Promise<void>;
@@ -159,6 +160,20 @@ export const HabitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   };
 
+  const reorderHabits = async (newHabits: Habit[]) => {
+    setHabits(newHabits);
+    
+    if (user && !user.isGuest) {
+      try {
+        await api.patch('/habits/reorder', {
+          habits: newHabits.map((h, index) => ({ id: h.id, order: index }))
+        });
+      } catch (err) {
+        console.error('Error persisting habit order:', err);
+      }
+    }
+  };
+
   const login = async (userData: User) => {
     setLoading(true);
     setError(null);
@@ -210,7 +225,7 @@ export const HabitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   return (
     <HabitContext.Provider value={{
-      habits, addHabit, removeHabit, toggleHabitComplete,
+      habits, addHabit, removeHabit, reorderHabits, toggleHabitComplete,
       user, login, loginAsGuest, logout, theme, toggleTheme, loading, error
     }}>
       {children}

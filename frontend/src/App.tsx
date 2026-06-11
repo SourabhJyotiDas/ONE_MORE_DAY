@@ -5,11 +5,11 @@ import HabitCard from './components/HabitCard';
 import HabitForm from './components/HabitForm';
 import { StatsGrid, PerformanceReport } from './components/StatsDashboard';
 import LoginScreen from './components/LoginScreen';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, Reorder } from 'framer-motion';
 import { LayoutGrid, BarChart3, PieChart as PieChartIcon } from 'lucide-react';
 
 const Dashboard: React.FC = () => {
-  const { habits, loading } = useHabits();
+  const { habits, loading, reorderHabits } = useHabits();
   const [activeTab, setActiveTab] = useState<'habits' | 'dashboard' | 'performance'>('habits');
 
   const tabs = [
@@ -97,13 +97,29 @@ const Dashboard: React.FC = () => {
                   <p className="font-bold text-primary">Click the + button to get started.</p>
                 </motion.div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <Reorder.Group 
+                  as="div"
+                  axis="y" 
+                  values={habits} 
+                  onReorder={reorderHabits}
+                  className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+                >
                   <AnimatePresence mode="popLayout">
                     {habits.map(habit => (
-                      <HabitCard key={habit.id} habit={habit} />
+                      <Reorder.Item 
+                        as="div"
+                        key={habit.id} 
+                        value={habit}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.95 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        <HabitCard habit={habit} />
+                      </Reorder.Item>
                     ))}
                   </AnimatePresence>
-                </div>
+                </Reorder.Group>
               )}
             </motion.section>
           )}
