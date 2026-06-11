@@ -5,8 +5,29 @@ import HabitCard from './components/HabitCard';
 import HabitForm from './components/HabitForm';
 import { StatsGrid, PerformanceReport } from './components/StatsDashboard';
 import LoginScreen from './components/LoginScreen';
-import { motion, AnimatePresence, Reorder } from 'framer-motion';
+import { motion, AnimatePresence, Reorder, useDragControls } from 'framer-motion';
 import { LayoutGrid, BarChart3, PieChart as PieChartIcon } from 'lucide-react';
+import type { Habit } from './types';
+
+const HabitCardItem = ({ habit }: { habit: Habit }) => {
+  const dragControls = useDragControls();
+
+  return (
+    <Reorder.Item 
+      as="div"
+      key={habit.id} 
+      value={habit}
+      dragListener={false}
+      dragControls={dragControls}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.95 }}
+      transition={{ duration: 0.2 }}
+    >
+      <HabitCard habit={habit} dragControls={dragControls} />
+    </Reorder.Item>
+  );
+};
 
 const Dashboard: React.FC = () => {
   const { habits, loading, reorderHabits } = useHabits();
@@ -106,17 +127,7 @@ const Dashboard: React.FC = () => {
                 >
                   <AnimatePresence mode="popLayout">
                     {habits.map(habit => (
-                      <Reorder.Item 
-                        as="div"
-                        key={habit.id} 
-                        value={habit}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.95 }}
-                        transition={{ duration: 0.2 }}
-                      >
-                        <HabitCard habit={habit} />
-                      </Reorder.Item>
+                      <HabitCardItem key={habit.id} habit={habit} />
                     ))}
                   </AnimatePresence>
                 </Reorder.Group>

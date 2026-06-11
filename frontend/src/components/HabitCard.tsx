@@ -3,7 +3,7 @@ import type { Habit } from '../types';
 import { useHabits } from '../context/HabitContext';
 import { format, subDays, isSameDay } from 'date-fns';
 import { Check, Trash2, TrendingUp, GripVertical, AlertTriangle } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, DragControls } from 'framer-motion';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
@@ -13,9 +13,10 @@ function cn(...inputs: ClassValue[]) {
 
 interface HabitCardProps {
   habit: Habit;
+  dragControls?: DragControls;
 }
 
-const HabitCard: React.FC<HabitCardProps> = ({ habit }) => {
+const HabitCard: React.FC<HabitCardProps> = ({ habit, dragControls }) => {
   const { toggleHabitComplete, removeHabit } = useHabits();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   
@@ -56,7 +57,13 @@ const HabitCard: React.FC<HabitCardProps> = ({ habit }) => {
       >
         <div className="flex justify-between items-start mb-6">
           <div className="flex items-start gap-3">
-            <div className="mt-1 text-muted-foreground/30 group-hover:text-muted-foreground transition-colors cursor-grab active:cursor-grabbing">
+            <div 
+              onPointerDown={(e) => dragControls?.start(e)}
+              className={cn(
+                "mt-1 text-muted-foreground/30 group-hover:text-muted-foreground transition-colors",
+                dragControls ? "cursor-grab active:cursor-grabbing" : "cursor-default"
+              )}
+            >
               <GripVertical size={20} />
             </div>
             <div>
