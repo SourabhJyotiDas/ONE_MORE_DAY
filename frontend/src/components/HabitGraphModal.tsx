@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import type { Habit } from '../types';
-import { format, subDays, isAfter, startOfDay } from 'date-fns';
+import { format, subDays } from 'date-fns';
 import { X, BarChart3, Award, Flame, CheckCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 
