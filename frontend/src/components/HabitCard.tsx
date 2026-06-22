@@ -2,8 +2,11 @@ import React, { useState } from 'react';
 import type { Habit } from '../types';
 import { useHabits } from '../context/HabitContext';
 import { format, subDays, isSameDay } from 'date-fns';
-import { Check, Trash2, TrendingUp, GripVertical, AlertTriangle } from 'lucide-react';
+import { Check, Trash2, TrendingUp, GripVertical, AlertTriangle, Calendar, BarChart3, MoreVertical, Pencil } from 'lucide-react';
 import { motion, AnimatePresence, DragControls } from 'framer-motion';
+import HabitCalendarModal from './HabitCalendarModal';
+import HabitGraphModal from './HabitGraphModal';
+import EditHabitModal from './EditHabitModal';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
@@ -19,6 +22,10 @@ interface HabitCardProps {
 const HabitCard: React.FC<HabitCardProps> = ({ habit, dragControls }) => {
   const { toggleHabitComplete, removeHabit } = useHabits();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showCalendar, setShowCalendar] = useState(false);
+  const [showGraph, setShowGraph] = useState(false);
+  const [showEdit, setShowEdit] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   
   const last7Days = Array.from({ length: 7 }, (_, i) => subDays(new Date(), 6 - i));
 
@@ -68,25 +75,80 @@ const HabitCard: React.FC<HabitCardProps> = ({ habit, dragControls }) => {
             </div>
             <div>
               <div className="flex items-center gap-2 mb-1">
-              <span className={cn(
-                "px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider",
-                habit.type === 'good' ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
-              )}>
-                {habit.type === 'good' ? 'Positive' : 'Break Habit'}
-              </span>
-            </div>
+               <span className={cn(
+                 "px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider",
+                 habit.type === 'good' ? "badge-positive" : "badge-negative"
+               )}>
+                 {habit.type === 'good' ? 'Positive' : 'Break Habit'}
+               </span>
+             </div>
             <h3 className="text-lg sm:text-xl font-bold font-display group-hover:text-primary transition-colors line-clamp-1">
               {habit.name}
             </h3>
             </div>
           </div>
           
-          <button
-            onClick={() => setShowDeleteConfirm(true)}
-            className="p-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-all cursor-pointer"
-          >
-            <Trash2 size={18} />
-          </button>
+          <div className="relative">
+            <button
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="p-2 rounded-xl hover:bg-secondary text-muted-foreground hover:text-foreground transition-all cursor-pointer"
+              title="More actions"
+            >
+              <MoreVertical size={20} />
+            </button>
+
+            {isMenuOpen && (
+              <>
+                <div 
+                  className="fixed inset-0 z-40" 
+                  onClick={() => setIsMenuOpen(false)}
+                />
+                <div className="absolute right-0 mt-2 z-50 w-48 bg-card border border-border rounded-2xl p-1.5 shadow-xl flex flex-col gap-0.5 animate-in fade-in duration-200">
+                  <button
+                    onClick={() => {
+                      setIsMenuOpen(false);
+                      setShowGraph(true);
+                    }}
+                    className="flex items-center gap-2.5 px-3 py-2.5 text-sm font-bold text-muted-foreground hover:text-foreground hover:bg-secondary rounded-xl transition-all cursor-pointer w-full text-left"
+                  >
+                    <BarChart3 size={16} />
+                    View Graph
+                  </button>
+                  <button
+                    onClick={() => {
+                      setIsMenuOpen(false);
+                      setShowCalendar(true);
+                    }}
+                    className="flex items-center gap-2.5 px-3 py-2.5 text-sm font-bold text-muted-foreground hover:text-foreground hover:bg-secondary rounded-xl transition-all cursor-pointer w-full text-left"
+                  >
+                    <Calendar size={16} />
+                    View Calendar
+                  </button>
+                  <button
+                    onClick={() => {
+                      setIsMenuOpen(false);
+                      setShowEdit(true);
+                    }}
+                    className="flex items-center gap-2.5 px-3 py-2.5 text-sm font-bold text-muted-foreground hover:text-foreground hover:bg-secondary rounded-xl transition-all cursor-pointer w-full text-left"
+                  >
+                    <Pencil size={16} />
+                    Edit Habit
+                  </button>
+                  <div className="h-px bg-border my-1" />
+                  <button
+                    onClick={() => {
+                      setIsMenuOpen(false);
+                      setShowDeleteConfirm(true);
+                    }}
+                    className="flex items-center gap-2.5 px-3 py-2.5 text-sm font-bold text-destructive hover:bg-destructive/10 rounded-xl transition-all cursor-pointer w-full text-left"
+                  >
+                    <Trash2 size={16} />
+                    Delete Habit
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
         </div>
 
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-6 mb-6">
@@ -142,6 +204,24 @@ const HabitCard: React.FC<HabitCardProps> = ({ habit, dragControls }) => {
           />
         </div>
       </div>
+
+      <AnimatePresence>
+        {showCalendar && (
+          <HabitCalendarModal habit={habit} onClose={() => setShowCalendar(false)} />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showGraph && (
+          <HabitGraphModal habit={habit} onClose={() => setShowGraph(false)} />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showEdit && (
+          <EditHabitModal habit={habit} onClose={() => setShowEdit(false)} />
+        )}
+      </AnimatePresence>
 
       <AnimatePresence>
         {showDeleteConfirm && (

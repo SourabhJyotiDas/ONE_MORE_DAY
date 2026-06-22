@@ -70,3 +70,22 @@ exports.reorderHabits = async (req, res) => {
     res.status(500).json({ message: 'Error reordering habits', error });
   }
 };
+
+exports.updateHabit = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, type, color } = req.body;
+    
+    const habit = await Habit.findByIdAndUpdate(
+      id,
+      { name, type, color },
+      { new: true }
+    );
+    if (!habit) return res.status(404).json({ message: 'Habit not found' });
+    
+    res.json(habit);
+  } catch (error) {
+    res.status(500).json({ message: 'Error updating habit', error });
+  }
+};
+

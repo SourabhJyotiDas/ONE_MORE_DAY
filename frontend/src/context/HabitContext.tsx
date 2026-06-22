@@ -9,6 +9,7 @@ interface HabitContextType {
   removeHabit: (id: string) => Promise<void>;
   reorderHabits: (newHabits: Habit[]) => void;
   toggleHabitComplete: (id: string, date: Date) => Promise<void>;
+  editHabit: (id: string, name: string, type: 'good' | 'bad', color: string) => Promise<void>;
   user: User | null;
   login: (user: User) => Promise<void>;
   loginAsGuest: () => void;
@@ -131,6 +132,27 @@ export const HabitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   };
 
+  const editHabit = async (id: string, name: string, type: 'good' | 'bad', color: string) => {
+    if (user?.isGuest) {
+      setHabits(habits.map(h => {
+        if (h.id === id) {
+          return { ...h, name, type, color };
+        }
+        return h;
+      }));
+      return;
+    }
+
+    try {
+      const response = await api.patch(`/habits/${id}`, { name, type, color });
+      const updatedHabit = { ...response.data, id: response.data._id };
+      setHabits(habits.map(h => h.id === id ? updatedHabit : h));
+    } catch (err) {
+      console.error('Error updating habit:', err);
+    }
+  };
+
+
   const toggleHabitComplete = async (id: string, date: Date) => {
     const dateStr = format(date, 'yyyy-MM-dd');
 
@@ -225,7 +247,7 @@ export const HabitProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   return (
     <HabitContext.Provider value={{
-      habits, addHabit, removeHabit, reorderHabits, toggleHabitComplete,
+      habits, addHabit, removeHabit, reorderHabits, toggleHabitComplete, editHabit,
       user, login, loginAsGuest, logout, theme, toggleTheme, loading, error
     }}>
       {children}
