@@ -107,10 +107,19 @@
     @apply border-border;
   }
   html {
-    scrollbar-gutter: stable;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  html::-webkit-scrollbar {
+    display: none;
   }
   body {
     @apply bg-background text-foreground font-sans antialiased;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  body::-webkit-scrollbar {
+    display: none;
   }
   h1, h2, h3, h4, h5, h6 {
     @apply font-display;
@@ -241,6 +250,18 @@
   opacity: 0.25 !important;
 }
 
+/* Override active date selector styles to prevent blue overlay */
+.react-calendar__tile--active {
+  background: transparent !important;
+  color: hsl(var(--foreground)) !important;
+}
+
+.react-calendar__tile--active:enabled:hover,
+.react-calendar__tile--active:enabled:focus {
+  background-color: hsl(var(--secondary)) !important;
+  color: hsl(var(--foreground)) !important;
+}
+
 /* Completed day styling utilizing the custom CSS variables */
 .habit-calendar-tile-completed {
   background-color: var(--habit-color) !important;
@@ -249,8 +270,17 @@
   box-shadow: 0 4px 12px var(--habit-color-rgb-alpha) !important;
 }
 
-.habit-calendar-tile-completed:hover {
+/* Ensure hover/focus/active states on completed tiles preserve the habit color */
+.habit-calendar-tile-completed:hover,
+.habit-calendar-tile-completed:focus,
+.habit-calendar-tile-completed:enabled:hover,
+.habit-calendar-tile-completed:enabled:focus,
+.react-calendar__tile--active.habit-calendar-tile-completed,
+.react-calendar__tile--active.habit-calendar-tile-completed:enabled:hover,
+.react-calendar__tile--active.habit-calendar-tile-completed:enabled:focus {
+  background-color: var(--habit-color) !important;
   filter: brightness(1.1) !important;
+  color: #ffffff !important;
 }
 
 .react-calendar__tile:disabled {

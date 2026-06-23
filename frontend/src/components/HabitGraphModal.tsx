@@ -23,7 +23,7 @@ interface HabitGraphModalProps {
 type Timeframe = 7 | 30 | 90;
 
 const HabitGraphModal: React.FC<HabitGraphModalProps> = ({ habit, onClose }) => {
-  const [timeframe, setTimeframe] = useState<Timeframe>(30);
+  const [timeframe, setTimeframe] = useState<Timeframe>(7);
 
   const rgb = hexToRgb(habit.color);
   const habitColorStyles = {
@@ -112,11 +112,11 @@ const HabitGraphModal: React.FC<HabitGraphModalProps> = ({ habit, onClose }) => 
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
-        className="relative w-full max-w-xl bg-card border border-border rounded-3xl shadow-2xl overflow-hidden flex flex-col z-10"
+        className="relative w-full max-w-xl bg-card border border-border rounded-3xl shadow-2xl overflow-hidden flex flex-col z-10 max-h-[90vh]"
         style={habitColorStyles}
       >
         {/* Header */}
-        <div className="p-6 border-b border-border flex items-center justify-between">
+        <div className="p-6 border-b border-border flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
             <div 
               className="w-10 h-10 rounded-xl flex items-center justify-center text-white"
@@ -146,108 +146,111 @@ const HabitGraphModal: React.FC<HabitGraphModalProps> = ({ habit, onClose }) => 
           </button>
         </div>
 
-        {/* Timeframe Selection Tabs */}
-        <div className="px-6 pt-4 flex gap-2 bg-secondary/10 border-b border-border">
-          {([7, 30, 90] as Timeframe[]).map((days) => (
-            <button
-              key={days}
-              onClick={() => setTimeframe(days)}
-              className={`pb-3 px-4 text-sm font-bold border-b-2 transition-all cursor-pointer ${
-                timeframe === days 
-                  ? 'border-primary text-primary' 
-                  : 'border-transparent text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              Last {days} Days
-            </button>
-          ))}
-        </div>
-
-        {/* Stats Summary Grid */}
-        <div className="grid grid-cols-3 border-b border-border bg-secondary/20 divide-x divide-border">
-          <div className="p-4 text-center">
-            <div className="flex justify-center text-amber-500 mb-1">
-              <Flame size={20} strokeWidth={2.5} />
-            </div>
-            <div className="text-lg font-black font-display leading-tight">{stats.maxStreak}d</div>
-            <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Max Streak</div>
-          </div>
-          
-          <div className="p-4 text-center">
-            <div className="flex justify-center text-emerald-500 mb-1">
-              <CheckCircle size={20} />
-            </div>
-            <div className="text-lg font-black font-display leading-tight">{stats.completedCount}</div>
-            <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Completions</div>
+        {/* Scrollable Content Wrapper */}
+        <div className="overflow-y-auto flex-1 scrollbar-hide">
+          {/* Timeframe Selection Tabs */}
+          <div className="px-6 pt-4 flex gap-2 bg-secondary/10 border-b border-border">
+            {([7, 30, 90] as Timeframe[]).map((days) => (
+              <button
+                key={days}
+                onClick={() => setTimeframe(days)}
+                className={`pb-3 px-4 text-sm font-bold border-b-2 transition-all cursor-pointer ${
+                  timeframe === days 
+                    ? 'border-primary text-primary' 
+                    : 'border-transparent text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                Last {days} Days
+              </button>
+            ))}
           </div>
 
-          <div className="p-4 text-center">
-            <div className="flex justify-center text-primary mb-1">
-              <Award size={20} />
+          {/* Stats Summary Grid */}
+          <div className="grid grid-cols-3 border-b border-border bg-secondary/20 divide-x divide-border">
+            <div className="p-4 text-center">
+              <div className="flex justify-center text-amber-500 mb-1">
+                <Flame size={20} strokeWidth={2.5} />
+              </div>
+              <div className="text-lg font-black font-display leading-tight">{stats.maxStreak}d</div>
+              <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Max Streak</div>
             </div>
-            <div className="text-lg font-black font-display leading-tight">
-              {stats.completionRate}%
+            
+            <div className="p-4 text-center">
+              <div className="flex justify-center text-emerald-500 mb-1">
+                <CheckCircle size={20} />
+              </div>
+              <div className="text-lg font-black font-display leading-tight">{stats.completedCount}</div>
+              <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Completions</div>
             </div>
-            <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Completion Rate</div>
+
+            <div className="p-4 text-center">
+              <div className="flex justify-center text-primary mb-1">
+                <Award size={20} />
+              </div>
+              <div className="text-lg font-black font-display leading-tight">
+                {stats.completionRate}%
+              </div>
+              <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Completion Rate</div>
+            </div>
           </div>
-        </div>
 
-        {/* Graph Display Area */}
-        <div className="p-6 h-[250px] sm:h-[300px] w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-              <defs>
-                <linearGradient id="habitColorGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor={habit.color} stopOpacity={0.3}/>
-                  <stop offset="95%" stopColor={habit.color} stopOpacity={0}/>
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
-              <XAxis 
-                dataKey="label" 
-                axisLine={false} 
-                tickLine={false} 
-                tick={{ fontSize: 10, fontWeight: 600, fill: 'hsl(var(--muted-foreground))' }}
-                interval={getXAxisInterval()}
-                dy={8}
-              />
-              <YAxis 
-                domain={[0, 1.15]}
-                ticks={[0, 1]}
-                tickFormatter={(value) => (value === 1 ? 'Done' : 'Miss')}
-                axisLine={false}
-                tickLine={false}
-                tick={{ fontSize: 10, fontWeight: 700, fill: 'hsl(var(--muted-foreground))' }}
-                dx={-8}
-              />
-              <Tooltip 
-                formatter={(value: any) => [value === 1 ? 'Done' : 'Missed', 'Status']}
-                contentStyle={{ 
-                  backgroundColor: 'hsl(var(--card))', 
-                  borderColor: 'hsl(var(--border))',
-                  borderRadius: '12px',
-                  boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)',
-                  fontSize: '12px',
-                  fontWeight: 600
-                }} 
-              />
-              <Area 
-                type="monotone" 
-                dataKey="completed" 
-                stroke={habit.color} 
-                strokeWidth={3}
-                fillOpacity={1} 
-                fill="url(#habitColorGrad)" 
-                dot={timeframe === 90 ? false : { r: 3.5, strokeWidth: 1, fill: 'hsl(var(--card))' }}
-                activeDot={{ r: 6, strokeWidth: 0 }}
-              />
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
+          {/* Graph Display Area */}
+          <div className="p-6 h-[250px] sm:h-[300px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="habitColorGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor={habit.color} stopOpacity={0.3}/>
+                    <stop offset="95%" stopColor={habit.color} stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
+                <XAxis 
+                  dataKey="label" 
+                  axisLine={false} 
+                  tickLine={false} 
+                  tick={{ fontSize: 10, fontWeight: 600, fill: 'hsl(var(--muted-foreground))' }}
+                  interval={getXAxisInterval()}
+                  dy={8}
+                />
+                <YAxis 
+                  domain={[0, 1.15]}
+                  ticks={[0, 1]}
+                  tickFormatter={(value) => (value === 1 ? 'Done' : 'Miss')}
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fontSize: 10, fontWeight: 700, fill: 'hsl(var(--muted-foreground))' }}
+                  dx={-8}
+                />
+                <Tooltip 
+                  formatter={(value: any) => [value === 1 ? 'Done' : 'Missed', 'Status']}
+                  contentStyle={{ 
+                    backgroundColor: 'hsl(var(--card))', 
+                    borderColor: 'hsl(var(--border))',
+                    borderRadius: '12px',
+                    boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)',
+                    fontSize: '12px',
+                    fontWeight: 600
+                  }} 
+                />
+                <Area 
+                  type="monotone" 
+                  dataKey="completed" 
+                  stroke={habit.color} 
+                  strokeWidth={3}
+                  fillOpacity={1} 
+                  fill="url(#habitColorGrad)" 
+                  dot={timeframe === 90 ? false : { r: 3.5, strokeWidth: 1, fill: 'hsl(var(--card))' }}
+                  activeDot={{ r: 6, strokeWidth: 0 }}
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
 
-        {/* Bottom Banner */}
-        <div className="p-4 bg-secondary/30 border-t border-border text-center text-xs text-muted-foreground">
-          Showing daily completion status (Done / Miss) over the selected duration.
+          {/* Bottom Banner */}
+          <div className="p-4 bg-secondary/30 border-t border-border text-center text-xs text-muted-foreground animate-none shrink-0">
+            Showing daily completion status (Done / Miss) over the selected duration.
+          </div>
         </div>
       </motion.div>
     </div>

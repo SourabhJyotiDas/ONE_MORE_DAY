@@ -87,11 +87,11 @@ const HabitCalendarModal: React.FC<HabitCalendarModalProps> = ({ habit, onClose 
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
-        className="relative w-full max-w-lg bg-card border border-border rounded-3xl shadow-2xl overflow-hidden flex flex-col z-10"
+        className="relative w-full max-w-lg bg-card border border-border rounded-3xl shadow-2xl overflow-hidden flex flex-col z-10 max-h-[90vh]"
         style={habitColorStyles}
       >
         {/* Header */}
-        <div className="p-6 border-b border-border flex items-center justify-between">
+        <div className="p-6 border-b border-border flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
             <div 
               className="w-10 h-10 rounded-xl flex items-center justify-center text-white"
@@ -121,53 +121,56 @@ const HabitCalendarModal: React.FC<HabitCalendarModalProps> = ({ habit, onClose 
           </button>
         </div>
 
-        {/* Stats Summary */}
-        <div className="grid grid-cols-3 border-b border-border bg-secondary/20 divide-x divide-border">
-          <div className="p-4 text-center">
-            <div className="flex justify-center text-amber-500 mb-1">
-              <Flame size={20} strokeWidth={2.5} />
+        {/* Scrollable Content Wrapper */}
+        <div className="overflow-y-auto flex-1 scrollbar-hide">
+          {/* Stats Summary */}
+          <div className="grid grid-cols-3 border-b border-border bg-secondary/20 divide-x divide-border">
+            <div className="p-4 text-center">
+              <div className="flex justify-center text-amber-500 mb-1">
+                <Flame size={20} strokeWidth={2.5} />
+              </div>
+              <div className="text-lg font-black font-display leading-tight">{calculateStreak()}</div>
+              <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Current Streak</div>
             </div>
-            <div className="text-lg font-black font-display leading-tight">{calculateStreak()}</div>
-            <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Current Streak</div>
-          </div>
-          
-          <div className="p-4 text-center">
-            <div className="flex justify-center text-emerald-500 mb-1">
-              <CheckCircle size={20} />
+            
+            <div className="p-4 text-center">
+              <div className="flex justify-center text-emerald-500 mb-1">
+                <CheckCircle size={20} />
+              </div>
+              <div className="text-lg font-black font-display leading-tight">{habit.completedDates.length}</div>
+              <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Total Logged</div>
             </div>
-            <div className="text-lg font-black font-display leading-tight">{habit.completedDates.length}</div>
-            <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Total Logged</div>
+
+            <div className="p-4 text-center">
+              <div className="flex justify-center text-primary mb-1">
+                <Award size={20} />
+              </div>
+              <div className="text-lg font-black font-display leading-tight">
+                {habit.completedDates.length > 0 
+                  ? `${Math.min(100, Math.round((habit.completedDates.length / 30) * 100))}%`
+                  : '0%'
+                }
+              </div>
+              <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">30d Target</div>
+            </div>
           </div>
 
-          <div className="p-4 text-center">
-            <div className="flex justify-center text-primary mb-1">
-              <Award size={20} />
-            </div>
-            <div className="text-lg font-black font-display leading-tight">
-              {habit.completedDates.length > 0 
-                ? `${Math.min(100, Math.round((habit.completedDates.length / 30) * 100))}%`
-                : '0%'
-              }
-            </div>
-            <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">30d Target</div>
+          {/* Calendar Wrapper */}
+          <div className="p-6">
+            <Calendar
+              onClickDay={handleDateClick}
+              tileClassName={getTileClassName}
+              tileDisabled={isTileDisabled}
+              className="habit-tracker-calendar"
+              maxDate={new Date()}
+              minDetail="decade"
+            />
           </div>
-        </div>
 
-        {/* Calendar Wrapper */}
-        <div className="p-6 overflow-y-auto">
-          <Calendar
-            onClickDay={handleDateClick}
-            tileClassName={getTileClassName}
-            tileDisabled={isTileDisabled}
-            className="habit-tracker-calendar"
-            maxDate={new Date()}
-            minDetail="decade"
-          />
-        </div>
-
-        {/* Instructions */}
-        <div className="p-4 bg-secondary/30 border-t border-border text-center text-xs text-muted-foreground">
-          Click on any past or current date to log or remove your habit entry.
+          {/* Instructions */}
+          <div className="p-4 bg-secondary/30 border-t border-border text-center text-xs text-muted-foreground">
+            Click on any past or current date to log or remove your habit entry.
+          </div>
         </div>
       </motion.div>
     </div>
