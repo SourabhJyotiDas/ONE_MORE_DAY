@@ -8,20 +8,28 @@ const HabitForm: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [name, setName] = useState('');
   const [type, setType] = useState<'good' | 'bad'>('good');
+  const [isCreating, setIsCreating] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim()) return;
-    addHabit(name, type, '#3b82f6');
-    setName('');
-    setIsOpen(false);
+    if (!name.trim() || isCreating) return;
+    setIsCreating(true);
+    try {
+      await addHabit(name, type, '#3b82f6');
+      setName('');
+      setIsOpen(false);
+    } catch (err) {
+      console.error('Error in handleSubmit:', err);
+    } finally {
+      setIsCreating(false);
+    }
   };
 
   return (
     <>
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-8 right-8 w-14 h-14 bg-primary text-primary-foreground rounded-full shadow-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all z-40 cursor-pointer"
+        className="fixed bottom-20 right-6 sm:bottom-8 sm:right-8 w-14 h-14 bg-primary text-primary-foreground rounded-full shadow-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all z-40 cursor-pointer"
       >
         <Plus size={32} />
       </button>
@@ -33,7 +41,7 @@ const HabitForm: React.FC = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              onClick={() => setIsOpen(false)}
+              onClick={() => !isCreating && setIsOpen(false)}
               className="absolute inset-0 bg-background/80 backdrop-blur-sm cursor-default"
             />
             <motion.div
@@ -43,8 +51,9 @@ const HabitForm: React.FC = () => {
               className="relative w-full max-w-md bg-card border rounded-3xl p-6 sm:p-8 shadow-2xl"
             >
               <button
+                disabled={isCreating}
                 onClick={() => setIsOpen(false)}
-                className="absolute top-6 right-6 text-muted-foreground hover:text-foreground cursor-pointer"
+                className="absolute top-6 right-6 text-muted-foreground hover:text-foreground cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <X size={20} />
               </button>
@@ -58,11 +67,12 @@ const HabitForm: React.FC = () => {
                   </label>
                   <input
                     autoFocus
+                    disabled={isCreating}
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder={type === 'good' ? "e.g. Read 20 mins" : "e.g. No smoking"}
-                    className="w-full bg-secondary/50 border-none rounded-2xl px-5 py-3.5 sm:px-6 sm:py-4 text-base sm:text-lg focus:ring-2 ring-primary transition-all"
+                    className="w-full bg-secondary/50 border-none rounded-2xl px-5 py-3.5 sm:px-6 sm:py-4 text-base sm:text-lg focus:ring-2 ring-primary transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                   />
                 </div>
 
@@ -73,8 +83,9 @@ const HabitForm: React.FC = () => {
                   <div className="grid grid-cols-2 gap-3 sm:gap-4">
                     <button
                       type="button"
+                      disabled={isCreating}
                       onClick={() => setType('good')}
-                      className={`p-3.5 sm:p-4 rounded-2xl border-2 transition-all font-bold text-sm sm:text-base cursor-pointer ${
+                      className={`p-3.5 sm:p-4 rounded-2xl border-2 transition-all font-bold text-sm sm:text-base cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
                         type === 'good' 
                           ? 'border-primary bg-primary/5 text-primary' 
                           : 'border-transparent bg-secondary/50 text-muted-foreground hover:bg-secondary'
@@ -84,8 +95,9 @@ const HabitForm: React.FC = () => {
                     </button>
                     <button
                       type="button"
+                      disabled={isCreating}
                       onClick={() => setType('bad')}
-                      className={`p-3.5 sm:p-4 rounded-2xl border-2 transition-all font-bold text-sm sm:text-base cursor-pointer ${
+                      className={`p-3.5 sm:p-4 rounded-2xl border-2 transition-all font-bold text-sm sm:text-base cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
                         type === 'bad' 
                           ? 'border-destructive bg-destructive/5 text-destructive' 
                           : 'border-transparent bg-secondary/50 text-muted-foreground hover:bg-secondary'
@@ -98,9 +110,17 @@ const HabitForm: React.FC = () => {
 
                 <button
                   type="submit"
-                  className="w-full bg-primary text-primary-foreground py-3.5 sm:py-4 rounded-2xl font-bold text-base sm:text-lg hover:opacity-90 transition-all shadow-lg shadow-primary/20 cursor-pointer"
+                  disabled={isCreating}
+                  className="w-full bg-primary text-primary-foreground py-3.5 sm:py-4 rounded-2xl font-bold text-base sm:text-lg hover:opacity-90 transition-all shadow-lg shadow-primary/20 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
-                  Create
+                  {isCreating ? (
+                    <>
+                      <div className="w-5 h-5 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
+                      Creating...
+                    </>
+                  ) : (
+                    'Create'
+                  )}
                 </button>
               </form>
             </motion.div>

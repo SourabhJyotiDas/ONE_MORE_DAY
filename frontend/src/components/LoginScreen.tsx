@@ -55,7 +55,7 @@ const LoginScreen: React.FC = () => {
           <span className="text-primary-foreground font-black text-3xl sm:text-4xl">1</span>
         </div>
         
-        <h1 className="text-4xl sm:text-5xl font-black font-display tracking-tighter mb-4">
+        <h1 className="text-3xl sm:text-5xl font-black font-display tracking-tighter mb-4">
           ONE MORE DAY
         </h1>
         <p className="text-muted-foreground text-base sm:text-lg mb-8 sm:mb-12 max-w-[280px] mx-auto">

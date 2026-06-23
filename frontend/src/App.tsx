@@ -48,7 +48,7 @@ const Dashboard: React.FC = () => {
           <motion.h2 
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-4xl sm:text-5xl md:text-6xl font-black font-display tracking-tighter mb-4"
+            className="text-3xl sm:text-5xl md:text-6xl font-black font-display tracking-tighter mb-4"
           >
             Your Progress
           </motion.h2>
@@ -62,8 +62,8 @@ const Dashboard: React.FC = () => {
           </motion.p>
         </header>
 
-        {/* Tab Navigation */}
-        <div className="flex bg-secondary/50 p-1.5 rounded-2xl mb-12 w-full sm:w-fit overflow-x-auto scrollbar-hide">
+        {/* Tab Navigation (Desktop Only) */}
+        <div className="hidden sm:flex bg-secondary/50 p-1.5 rounded-2xl mb-12 w-fit">
           {tabs.map((tab) => (
             <button
               key={tab.id}
@@ -166,6 +166,29 @@ const Dashboard: React.FC = () => {
           )}
         </AnimatePresence>
       </main>
+
+      {/* Mobile Bottom Tab Bar */}
+      <div className="sm:hidden fixed bottom-0 left-0 right-0 bg-card/85 backdrop-blur-md border-t border-border px-6 py-2.5 flex justify-around items-center z-40 shadow-2xl">
+        {tabs.map((tab) => {
+          const isActive = activeTab === tab.id;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex flex-col items-center gap-1 py-1 px-3 rounded-xl transition-all cursor-pointer ${
+                isActive 
+                  ? 'text-primary scale-105' 
+                  : 'text-muted-foreground'
+              }`}
+            >
+              <div className={`p-1.5 rounded-xl transition-colors ${isActive ? 'bg-primary/10' : ''}`}>
+                {React.cloneElement(tab.icon, { size: 20 })}
+              </div>
+              <span className="text-[10px] font-bold tracking-tight">{tab.label}</span>
+            </button>
+          );
+        })}
+      </div>
 
       <HabitForm />
     </div>

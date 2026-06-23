@@ -26,6 +26,7 @@ const HabitCard: React.FC<HabitCardProps> = ({ habit, dragControls }) => {
   const [showGraph, setShowGraph] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   
   const last7Days = Array.from({ length: 7 }, (_, i) => subDays(new Date(), 6 - i));
 
@@ -52,9 +53,17 @@ const HabitCard: React.FC<HabitCardProps> = ({ habit, dragControls }) => {
     return streak;
   };
 
-  const handleDelete = () => {
-    removeHabit(habit.id);
-    setShowDeleteConfirm(false);
+  const handleDelete = async () => {
+    if (isDeleting) return;
+    setIsDeleting(true);
+    try {
+      await removeHabit(habit.id);
+      setShowDeleteConfirm(false);
+    } catch (err) {
+      console.error('Error deleting habit:', err);
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   return (
@@ -230,7 +239,7 @@ const HabitCard: React.FC<HabitCardProps> = ({ habit, dragControls }) => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              onClick={() => setShowDeleteConfirm(false)}
+              onClick={() => !isDeleting && setShowDeleteConfirm(false)}
               className="absolute inset-0 bg-background/80 backdrop-blur-sm"
             />
             <motion.div
@@ -251,16 +260,25 @@ const HabitCard: React.FC<HabitCardProps> = ({ habit, dragControls }) => {
 
               <div className="grid grid-cols-2 gap-4">
                 <button
+                  disabled={isDeleting}
                   onClick={() => setShowDeleteConfirm(false)}
-                  className="py-3.5 rounded-2xl font-bold bg-secondary hover:bg-secondary/80 transition-all cursor-pointer"
+                  className="py-3.5 rounded-2xl font-bold bg-secondary hover:bg-secondary/80 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Cancel
                 </button>
                 <button
+                  disabled={isDeleting}
                   onClick={handleDelete}
-                  className="py-3.5 rounded-2xl font-bold bg-destructive text-destructive-foreground hover:opacity-90 transition-all shadow-lg shadow-destructive/20 cursor-pointer"
+                  className="py-3.5 rounded-2xl font-bold bg-destructive text-destructive-foreground hover:opacity-90 transition-all shadow-lg shadow-destructive/20 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
-                  Delete
+                  {isDeleting ? (
+                    <>
+                      <div className="w-5 h-5 border-2 border-destructive-foreground border-t-transparent rounded-full animate-spin" />
+                      Deleting...
+                    </>
+                  ) : (
+                    'Delete'
+                  )}
                 </button>
               </div>
             </motion.div>
